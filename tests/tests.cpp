@@ -6,20 +6,7 @@
 using namespace std;
 
 int TestForBMPLoading() {
-    ifstream ifs_testing("C:\\Users\\Andrew\\Downloads\\BMPImaged (1)\\BMPImaged\\BMP_Filters_2\\Airplane.bmp", ios::binary);
-    
-    vector<std::byte> expected_r = {std::byte{255}, std::byte{0}, std::byte{0}};
-
-    BMPImage img;
-    if (!img.read(ifs_testing)) {
-        return false;
-    }
-
-    ifs_testing.close();
-
-    img.GetConstPixels() == exprected_r;
-
-    img.ApplyFilter
+    return 0;
 
 }
 
@@ -38,5 +25,5 @@ void TestForCropFilter() {
 //...
 
 int main() {
-    return 0;
+    TestForBMPLoading();
 }

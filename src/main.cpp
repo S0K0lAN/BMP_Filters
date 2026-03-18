@@ -45,7 +45,7 @@ int main() {
     std::ifstream ifs("C:\\Users\\Andrew\\Downloads\\BMPImaged (1)\\BMPImaged\\BMP_Filters_2\\Airplane.bmp", ios::binary);
     BMPImage img;
     img.read(ifs);
-    std::ofstream ofs("C:\\Users\\Andrew\\Downloads\\BMPImaged (1)\\BMPImaged\\BMP_Filters_2\\Airplane_out.bmp", ios::binary);
+    std::ofstream ofs("Airplane_out.bmp", ios::binary);
     img.write(ofs);
 
     return 0;

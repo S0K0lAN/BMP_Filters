@@ -3,6 +3,14 @@
 #include <cstdint>
 #include <iostream>
 
+void CropFilter::Apply(BMPImage& image) {
+
+}
+
+void NegativeFilter::Apply(BMPImage& image) {
+
+}
+
 void GrayscaleFilter::Apply(BMPImage& image) {
     int width = image.GetWidth();
     int height = image.GetHeight();
@@ -25,4 +33,20 @@ void GrayscaleFilter::Apply(BMPImage& image) {
             image.SetPixel(x, y, pixel);
         }
     }
+}
+
+void MatrixFilter::Apply(BMPImage& image) {
+
+}
+
+void SharpeningFilter::Apply(BMPImage& image) {
+
+}
+
+void GaussianFilter::Apply(BMPImage& image) {
+
+}
+
+void EdgeDetectionFilter::Apply(BMPImage& image) {
+
 }
