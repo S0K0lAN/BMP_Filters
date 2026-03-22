@@ -17,7 +17,7 @@ static void PrintUsage(const char *argv0)
     std::cerr << "Example: " << argv0 << " input.bmp output.bmp -gs -neg\n";
 }
 
-static bool ReadAndProcessInput(std::istream &is, ActionManager &action_manager, int argc, char *argv[])
+static bool ReadAndProcessInput(ActionManager &action_manager, int argc, char *argv[])
 {
     if (argc < 3)
     {
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     }
 
     ActionManager manager;
-    if (!ReadAndProcessInput(std::cin, manager, argc, argv))
+    if (!ReadAndProcessInput(manager, argc, argv))
     {
         return 1;
     }

@@ -28,7 +28,7 @@ void CropFilter::Apply(BMPImage& image) {
             newPixels[y][x] = image.GetPixel(x, y);
         }
     }
-    image.SetPixels(newPixels);
+    image.SetPixels(std::move(newPixels));
 }
 
 void NegativeFilter::Apply(BMPImage& image) {
