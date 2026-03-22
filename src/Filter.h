@@ -3,48 +3,76 @@
 #include <vector>
 #include "BMPImageLib.h"
 
-struct FilterDescriptor {
+struct FilterDescriptor
+{
     std::string name;
     std::vector<std::string> parameters;
 };
 
-class IFilter {
+class IFilter
+{
 public:
     virtual ~IFilter() = default;
-    virtual void Apply(BMPImage& image) = 0;
+    virtual void Apply(BMPImage &image) = 0;
 };
 
-class CropFilter : public IFilter {
+class CropFilter : public IFilter
+{
+private:
+    int width_;
+    int height_;
+
 public:
-    void Apply(BMPImage& image) override;
+    CropFilter(int width = 800, int height = 600) : width_(width), height_(height) {}
+    void Apply(BMPImage &image) override;
 };
 
-class NegativeFilter : public IFilter {
+class NegativeFilter : public IFilter
+{
 public:
-    void Apply(BMPImage& image) override;
+    void Apply(BMPImage &image) override;
 };
 
-class GrayscaleFilter : public IFilter {
+class GrayscaleFilter : public IFilter
+{
 public:
-    void Apply(BMPImage& image) override;
+    void Apply(BMPImage &image) override;
 };
 
-class MatrixFilter : public IFilter {
+class EdgeDetectionFilter : public IFilter
+{
+private:
+    double threshold_;
+
 public:
-    void Apply(BMPImage& image) override = 0;
+    EdgeDetectionFilter(double threshold = 0.1) : threshold_(threshold) {}
+    void Apply(BMPImage &image) override;
 };
 
-class SharpeningFilter : public MatrixFilter {
+class MatrixFilter : public IFilter
+{
+protected:
+    std::vector<std::vector<double>> matrix_;
+
 public:
-    void Apply(BMPImage& image) override;
+    MatrixFilter(const std::vector<std::vector<double>> &matrix) : matrix_(matrix) {}
+    void Apply(BMPImage &image) override;
 };
 
-class GaussianFilter : public MatrixFilter {
+class SharpeningFilter : public MatrixFilter
+{
 public:
-    void Apply(BMPImage& image) override;
+    SharpeningFilter();
+    void Apply(BMPImage &image) override;
 };
 
-class EdgeDetectionFilter : public MatrixFilter {
+class GaussianFilter : public MatrixFilter
+{
+private:
+    double sigma_;
+    static std::vector<std::vector<double>> GenerateGaussianMatrix(double sigma);
+
 public:
-    void Apply(BMPImage& image) override;
+    GaussianFilter(double sigma = 1.0);
+    void Apply(BMPImage &image) override;
 };

@@ -5,7 +5,7 @@
 #include <cstdint>
 
 struct RGB {
-    std::byte r, g, b, a;
+    float r, g, b, a;
 };
 
 PACKED_STRUCT_BEGIN BitmapFileHeader {
@@ -44,4 +44,6 @@ public:
     void SetPixel(int x, int y, RGB);
     int GetWidth();
     int GetHeight();
+    
+    void SetPixels(const std::vector<std::vector<RGB>>& pixels);
 };
