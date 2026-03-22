@@ -12,18 +12,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(USE_ASAN "Enable Address Sanitizer" ON)
-
-if(USE_ASAN)
-    message(STATUS "AddressSanitizer enabled")
-    
-    # Флаги компиляции
-    add_compile_options(-fsanitize=address -fno-omit-frame-pointer -g)
-    
-    # Флаги линковки (обязательно!)
-    add_link_options(-fsanitize=address)
-endif()
-
 # Enable warnings and treat warnings as errors when requested
 if(MSVC)
     add_compile_options(/W4)
