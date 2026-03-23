@@ -66,11 +66,11 @@ public:
     void Apply(BMPImage &image) override;
 };
 
-class GaussianFilter : public MatrixFilter
+class GaussianFilter : public IFilter
 {
 private:
     double sigma_;
-    static std::vector<std::vector<double>> GenerateGaussianMatrix(double sigma);
+    static std::vector<double> GenerateGaussianKernel(double sigma);
 
 public:
     GaussianFilter(double sigma = 1.0);

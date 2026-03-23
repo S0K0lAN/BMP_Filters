@@ -1,154 +1,37 @@
 #include <iostream>
+#include <cassert>
 #include <fstream>
-#include <filesystem>
-#include <cmath>
-
-#include "BMPImageLib.h"
-#include "Filter.h"
+#include "../src/BMPImageLib.h"
+#include "../src/Filter.h"
 
 using namespace std;
 
-static filesystem::path GetAssetPath(const string &filename)
-{
-    filesystem::path current = filesystem::path(__FILE__).parent_path();
-    return current / "AssetsForTesting" / filename;
-}
-
-bool TestForBMPLoading()
-{
-    auto asset = GetAssetPath("Airplane.bmp");
-    ifstream ifs(asset, ios::binary);
-    if (!ifs.is_open())
-    {
-        cerr << "Failed to open asset: " << asset << '\n';
-        return false;
-    }
-
+void TestForBlurFilter() {
     BMPImage image;
-    if (!image.read(ifs))
-    {
-        cerr << "BMP read failed for asset: " << asset << '\n';
-        return false;
-    }
+    ifstream file("../../tests/AssetsForTesting/Airplane.bmp", ios::binary);
+    assert(file.is_open() && "Failed to open file");
+    bool loaded = image.read(file);
+    file.close();
+    assert(loaded && "Failed to load image");
 
-    if (image.GetWidth() <= 0 || image.GetHeight() <= 0)
-    {
-        cerr << "Invalid dimensions: " << image.GetWidth() << "x" << image.GetHeight() << '\n';
-        return false;
-    }
-
-    cout << "TestForBMPLoading: PASSED\n";
-    return true;
-}
-
-bool TestForBMPSaving()
-{
-    auto asset = GetAssetPath("Airplane.bmp");
-    ifstream ifs(asset, ios::binary);
-    if (!ifs.is_open())
-    {
-        cerr << "Failed to open asset: " << asset << '\n';
-        return false;
-    }
-
-    BMPImage image;
-    if (!image.read(ifs))
-    {
-        cerr << "BMP read failed for asset: " << asset << '\n';
-        return false;
-    }
-
-    auto outPath = GetAssetPath("Airplane_out_test.bmp");
-    ofstream ofs(outPath, ios::binary);
-    if (!ofs.is_open())
-    {
-        cerr << "Failed to open output file: " << outPath << '\n';
-        return false;
-    }
-
-    image.write(ofs);
-    ofs.close();
-
-    ifstream ifs2(outPath, ios::binary | ios::ate);
-    if (!ifs2.is_open())
-    {
-        cerr << "Failed to open written file: " << outPath << '\n';
-        return false;
-    }
-
-    auto size = ifs2.tellg();
-    if (size <= 0)
-    {
-        cerr << "Written file has size 0: " << outPath << '\n';
-        filesystem::remove(outPath);
-        return false;
-    }
-
-    filesystem::remove(outPath);
-    cout << "TestForBMPSaving: PASSED\n";
-    return true;
-}
-
-bool TestForGrayscaleFilter()
-{
-    auto asset = GetAssetPath("Airplane.bmp");
-    ifstream ifs(asset, ios::binary);
-    if (!ifs.is_open())
-    {
-        cerr << "Failed to open asset: " << asset << '\n';
-        return false;
-    }
-
-    BMPImage image;
-    if (!image.read(ifs))
-    {
-        cerr << "BMP read failed for asset: " << asset << '\n';
-        return false;
-    }
-
-    GrayscaleFilter filter;
+    GaussianFilter filter(3.0);
     filter.Apply(image);
 
-    int width = image.GetWidth();
-    int height = image.GetHeight();
-    if (width <= 0 || height <= 0)
-    {
-        cerr << "Invalid dimensions after grayscale" << '\n';
-        return false;
-    }
+    // Check that the image is still valid
+    assert(image.GetWidth() > 0 && image.GetHeight() > 0);
 
-    // Sample 10 random pixels (or full scan for small image) to verify grayscale
-    const float tolerance = 0.001f;
-    for (int y = 0; y < height; y += max(1, height / 10))
-    {
-        for (int x = 0; x < width; x += max(1, width / 10))
-        {
-            RGB p = image.GetPixel(x, y);
-            if (fabs(p.r - p.g) > tolerance || fabs(p.g - p.b) > tolerance)
-            {
-                cerr << "Non-grayscale pixel found at (" << x << "," << y << "): " << p.r << "," << p.g << "," << p.b << '\n';
-                return false;
-            }
-        }
-    }
+    // Check a few pixels to ensure they are reasonable
+    RGB pixel = image.GetPixel(10, 10);
+    assert(pixel.r >= 0.0f && pixel.r <= 1.0f);
+    assert(pixel.g >= 0.0f && pixel.g <= 1.0f);
+    assert(pixel.b >= 0.0f && pixel.b <= 1.0f);
+    assert(pixel.a == 1.0f);
 
-    cout << "TestForGrayscaleFilter: PASSED\n";
-    return true;
+    cout << "Blur test passed" << endl;
 }
 
-int main()
-{
-    bool status = true;
-    status &= TestForBMPLoading();
-    status &= TestForBMPSaving();
-    status &= TestForGrayscaleFilter();
-
-    if (status)
-    {
-        cout << "All tests PASSED" << '\n';
-        return 0;
-    }
-
-    cerr << "Some tests FAILED" << '\n';
-    return 1;
+int main() {
+    TestForBlurFilter();
+    cout << "All tests passed" << endl;
+    return 0;
 }

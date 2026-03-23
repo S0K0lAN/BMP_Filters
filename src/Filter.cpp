@@ -181,35 +181,67 @@ void SharpeningFilter::Apply(BMPImage& image) {
     MatrixFilter::Apply(image);
 }
 
-std::vector<std::vector<double>> GaussianFilter::GenerateGaussianMatrix(double sigma) {
+std::vector<double> GaussianFilter::GenerateGaussianKernel(double sigma) {
     int size = static_cast<int>(std::ceil(sigma * 3)) * 2 + 1;
     if (size < 3) size = 3;
     
-    std::vector<std::vector<double>> matrix(size, std::vector<double>(size));
+    std::vector<double> kernel(size);
     double sum = 0.0;
     int center = size / 2;
     
     for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            int dx = i - center;
-            int dy = j - center;
-            matrix[i][j] = std::exp(-(dx*dx + dy*dy) / (2 * sigma * sigma));
-            sum += matrix[i][j];
-        }
+        int dx = i - center;
+        kernel[i] = std::exp(-(dx*dx) / (2 * sigma * sigma));
+        sum += kernel[i];
     }
     for (int i = 0; i < size; ++i) {
-        for (int j = 0; j < size; ++j) {
-            matrix[i][j] /= sum;
-        }
+        kernel[i] /= sum;
     }
     
-    return matrix;
+    return kernel;
 }
 
 GaussianFilter::GaussianFilter(double sigma) 
-    : MatrixFilter(GenerateGaussianMatrix(sigma)), sigma_(sigma) {
+    : sigma_(sigma) {
 }
 
 void GaussianFilter::Apply(BMPImage& image) {
-    MatrixFilter::Apply(image);
+    auto kernel = GenerateGaussianKernel(sigma_);
+    int width = image.GetWidth();
+    int height = image.GetHeight();
+    int ksize = kernel.size();
+    int offset = ksize / 2;
+    
+    // Horizontal blur
+    std::vector<std::vector<RGB>> temp(height, std::vector<RGB>(width));
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            double sumR = 0.0, sumG = 0.0, sumB = 0.0;
+            for (int k = -offset; k <= offset; ++k) {
+                int nx = std::clamp(x + k, 0, width - 1);
+                RGB p = image.GetPixel(nx, y);
+                double w = kernel[k + offset];
+                sumR += p.r * w;
+                sumG += p.g * w;
+                sumB += p.b * w;
+            }
+            temp[y][x] = {static_cast<float>(std::clamp(sumR, 0.0, 1.0)), static_cast<float>(std::clamp(sumG, 0.0, 1.0)), static_cast<float>(std::clamp(sumB, 0.0, 1.0)), 1.0f};
+        }
+    }
+    
+    // Vertical blur
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            double sumR = 0.0, sumG = 0.0, sumB = 0.0;
+            for (int k = -offset; k <= offset; ++k) {
+                int ny = std::clamp(y + k, 0, height - 1);
+                RGB p = temp[ny][x];
+                double w = kernel[k + offset];
+                sumR += p.r * w;
+                sumG += p.g * w;
+                sumB += p.b * w;
+            }
+            image.SetPixel(x, y, {static_cast<float>(std::clamp(sumR, 0.0, 1.0)), static_cast<float>(std::clamp(sumG, 0.0, 1.0)), static_cast<float>(std::clamp(sumB, 0.0, 1.0)), 1.0f});
+        }
+    }
 }
