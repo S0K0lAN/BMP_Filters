@@ -10,10 +10,10 @@ static void PrintUsage(const char *argv0)
     std::cerr << "Filters:\n"
               << "  -gs      (grayscale)\n"
               << "  -neg     (negative)\n"
-              << "  -crop    (crop)\n"
+              << "  -crop width height (crop, default 800 600)\n"
               << "  -sharp   (sharpen)\n"
-              << "  -blur    (gaussian blur)\n"
-              << "  -edge    (edge detection)\n";
+              << "  -blur sigma (gaussian blur, default sigma=3.0)\n"
+              << "  -edge threshold (edge detection, default threshold=0.1)\n";
     std::cerr << "Example: " << argv0 << " input.bmp output.bmp -gs -neg\n";
 }
 

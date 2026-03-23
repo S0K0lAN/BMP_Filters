@@ -5,6 +5,8 @@
 #include <memory>
 #include <unordered_map>
 #include <string>
+#include <functional>
+#include <vector>
 
 #include "BMPImageLib.h"
 #include "Filter.h"
@@ -14,7 +16,7 @@ private:
     BMPImage image_;
     std::string input_file_;
     std::string output_file_;
-    std::unordered_map<std::string, std::unique_ptr<IFilter>> filters_;
+    std::unordered_map<std::string, std::function<std::unique_ptr<IFilter>(const std::vector<std::string>&)>> filters_;
     
 public:
     ActionManager();
