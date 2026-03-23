@@ -1,52 +1,83 @@
 #include <iostream>
 #include <fstream>
-    
+#include <string>
+
 #include "ActionManager.h"
-#include "Filter.h"
-#include "BMPImageLib.h"
 
-using namespace std;
+static void PrintUsage(const char *argv0)
+{
+    std::cerr << "Usage: " << argv0 << " <input.bmp> <output.bmp> [filters...]\n";
+    std::cerr << "Filters:\n"
+              << "  -gs      (grayscale)\n"
+              << "  -neg     (negative)\n"
+              << "  -crop    (crop)\n"
+              << "  -sharp   (sharpen)\n"
+              << "  -blur    (gaussian blur)\n"
+              << "  -edge    (edge detection)\n";
+    std::cerr << "Example: " << argv0 << " input.bmp output.bmp -gs -neg\n";
+}
 
-/*
-{имя программы} {путь к входному файлу} {путь к выходному файлу}
-[-{имя фильтра 1} [параметр фильтра 1] [параметр фильтра 2] ...]
-[-{имя фильтра 2} [параметр фильтра 1] [параметр фильтра 2] ...] ...
-*/
-// void ReadAndProcessInput(std::istream& is, ActionManager& action_manager, int argc, char* argv[]) {
-//     action_manager.LoadImage(argv[1]);
-    
-//     for (int i = 3; i < argc; i++) {
-//         if(argv[i][0] == '-'){
-//             FilterDescriptor filter_descriptor;
-//             filter_descriptor.name = argv[i];
-            
+static bool ReadAndProcessInput(ActionManager &action_manager, int argc, char *argv[])
+{
+    if (argc < 3)
+    {
+        PrintUsage(argv[0]);
+        return false;
+    }
 
-//             while(i + 1 < argc && argv[i+1][0] != '-') {
-//                 filter_descriptor.parameters.push_back(argv[i + 1]);
-//                 i++;
-//             }
+    const std::string input_path = argv[1];
+    const std::string output_path = argv[2];
 
-//             action_manager.ApplyFilter(filter_descriptor);
-//         }
-//     }
+    if (!action_manager.LoadImage(input_path))
+    {
+        std::cerr << "Failed to load image: " << input_path << '\n';
+        return false;
+    }
 
-// }
+    for (int i = 3; i < argc; ++i)
+    {
+        std::string token = argv[i];
+        if (token.empty() || token[0] != '-')
+        {
+            std::cerr << "Invalid argument: " << token << '\n';
+            PrintUsage(argv[0]);
+            return false;
+        }
 
-// int main(int argc, char* argv[]){
-//     ActionManager action_manager;
-//     ReadAndProcessInput(cin, action_manager, argc, argv);
-//     action_manager.SaveImage(argv[2]);
+        FilterDescriptor descriptor;
+        descriptor.name = token;
 
+        while (i + 1 < argc && argv[i + 1][0] != '-')
+        {
+            descriptor.parameters.emplace_back(argv[++i]);
+        }
 
+        action_manager.ApplyFilter(descriptor);
+    }
 
-// }
+    if (!action_manager.SaveImage(output_path))
+    {
+        std::cerr << "Failed to save image: " << output_path << '\n';
+        return false;
+    }
 
-int main() {
-    std::ifstream ifs("C:\\Users\\Andrew\\Downloads\\BMPImaged (1)\\BMPImaged\\BMP_Filters_2\\Airplane.bmp", ios::binary);
-    BMPImage img;
-    img.read(ifs);
-    std::ofstream ofs("Airplane_out.bmp", ios::binary);
-    img.write(ofs);
+    std::cout << "Image processed successfully: " << output_path << '\n';
+    return true;
+}
+
+int main(int argc, char *argv[])
+{
+    if (argc < 3)
+    {
+        PrintUsage(argv[0]);
+        return 1;
+    }
+
+    ActionManager manager;
+    if (!ReadAndProcessInput(manager, argc, argv))
+    {
+        return 1;
+    }
 
     return 0;
 }
